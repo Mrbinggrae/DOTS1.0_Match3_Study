@@ -132,6 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1764530394}
+  - component: {fileID: 1764530395}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -154,3 +155,28 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1764530395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1764530392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf55cfef91be9cf478930c4c4fd843e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boardSize:
+    x: 7
+    y: 7
+  matchValuePrefabDictionary:
+    m_keys: 01000000020000000300000004000000050000000600000007000000
+    m_values:
+    - {fileID: 3094628849361334630, guid: 2ee3eab27013b8f4bbaa3346098abef0, type: 3}
+    - {fileID: 3094628849361334630, guid: 9724fa7c3f4d42b4d90fb28b2a535af3, type: 3}
+    - {fileID: 3094628849361334630, guid: 6dafb07ae6aaebf43966390226246aa5, type: 3}
+    - {fileID: 3094628849361334630, guid: 385820c9c5c995841947ce1949e772ec, type: 3}
+    - {fileID: 3094628849361334630, guid: 4301fb25c7d185b4890bf6fc7fa01f19, type: 3}
+    - {fileID: 3094628849361334630, guid: a73dc9afde9153d478541fa46f33f31c, type: 3}
+    - {fileID: 3094628849361334630, guid: 3129c3301d0112a49b0bb6b4351707de, type: 3}
