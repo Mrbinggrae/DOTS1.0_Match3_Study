@@ -19,9 +19,11 @@ public class BoardAuthoring : MonoBehaviour
 	{
 		public override void Bake(BoardAuthoring authoring)
 		{
-            BoardConfig.SetBoardSize(authoring.boardSize);
 
-            AddComponent<BoardData>();
+            AddComponent(new BoardData
+            {
+                BoardSize = authoring.boardSize,
+            });
 
             DynamicBuffer<GamePiecePrefabBuffer> piecePrefabBuffers = AddBuffer<GamePiecePrefabBuffer>();
 
@@ -30,6 +32,7 @@ public class BoardAuthoring : MonoBehaviour
                 GamePiecePrefabBuffer buffer = default;
                 buffer.Prefab = GetEntity(piece.Value);
                 buffer.MatchValue = piece.Key;
+
                 piecePrefabBuffers.Add(buffer);
             }
         }

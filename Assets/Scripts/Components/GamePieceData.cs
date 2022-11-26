@@ -1,5 +1,5 @@
 using Unity.Entities;
-
+using Unity.Mathematics;
 
 public enum MatchValue
 {
@@ -15,5 +15,6 @@ public enum MatchValue
 
 public struct GamePieceData : IComponentData
 {
-    public MatchValue Value;
+    public MatchValue MatchValue;
+    public int2 Coord;
 }

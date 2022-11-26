@@ -7,19 +7,15 @@ using Unity.Collections;
 [Serializable]
 public struct BoardData : IComponentData
 {
+    public int2 BoardSize;
+    public int Seed;
 }
 
 
-public struct BoardConfig
+public readonly struct BoardConfig
 {
     public static readonly float GAME_PIECE_MOVE_SPEED = 10f;
     public static readonly float GAME_DELAY_TIME = 0.3f;
-
-    public static int2 BoardSize { get; private set; }
-    public static void SetBoardSize(int2 value)
-    {
-       BoardSize = value;
-    }
 }
 
 public struct BoardQeury

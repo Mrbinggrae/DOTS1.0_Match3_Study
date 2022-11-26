@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3894965471542101597}
+  - component: {fileID: 1559348609027305789}
   m_Layer: 0
   m_Name: '[Temp] GamePieceEntity(Purple)'
   m_TagString: Untagged
@@ -31,3 +32,17 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1559348609027305789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3094628849361334630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3def14bc75da4684ba1bb18b9f8b0273, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  presentationGamePiecePrefab: {fileID: 1161606897531048, guid: 805c5ac8742f1457bb6137a92eef3032,
+    type: 3}

@@ -8,12 +8,14 @@ public partial struct TileGenerateSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)
-    {
+    { 
         state.RequireForUpdate<BoardData>();
     }
+
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
+
     }
 
     [BurstCompile]
@@ -21,7 +23,7 @@ public partial struct TileGenerateSystem : ISystem
     {
         var ecbSingleton = SystemAPI.GetSingleton<BeginInitializationEntityCommandBufferSystem.Singleton>();
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-        var BoardSize = BoardConfig.BoardSize;
+        var BoardSize = SystemAPI.GetSingleton<BoardData>().BoardSize;
 
         for (int x = 0; x < BoardSize.x; x++)
         {
@@ -29,14 +31,12 @@ public partial struct TileGenerateSystem : ISystem
             {
                 var TileEntity = ecb.CreateEntity();
 
-                ecb.AddComponent(TileEntity, new TileData {
-                    Seed = UnityEngine.Random.Range(0, int.MaxValue)
+                ecb.AddComponent(TileEntity, new TileData
+                {
+                    Seed = UnityEngine.Random.Range(0, int.MaxValue),
+                    Coord =  new(x, y)
                 });
 
-                ecb.AddComponent(TileEntity, new CoordinateData
-                {
-                    Coord = new(x, y)
-                });
 
                 ecb.AddComponent<EmptyTileTag>(TileEntity);
             }
