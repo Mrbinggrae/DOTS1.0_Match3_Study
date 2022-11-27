@@ -13,6 +13,9 @@ public class GamePieceAuthoring : MonoBehaviour
 		public override void Bake(GamePieceAuthoring authoring)
 		{
             AddComponent<GamePieceData>();
+            AddBuffer<HorizontalMatchedBuffer>();
+            AddBuffer<VerticalMatchedBuffer>();
+
 
             PresentationGO pgo = new()
             {

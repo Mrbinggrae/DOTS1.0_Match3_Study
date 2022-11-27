@@ -14,7 +14,7 @@ public struct BoardData : IComponentData
 
 public readonly struct BoardConfig
 {
-    public static readonly float GAME_PIECE_MOVE_SPEED = 10f;
+    public static readonly float GAME_PIECE_MOVE_SPEED = 20f;
     public static readonly float GAME_DELAY_TIME = 0.3f;
 }
 

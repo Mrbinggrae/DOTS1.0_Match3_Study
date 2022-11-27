@@ -2,19 +2,22 @@ using UnityEngine;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Burst.Intrinsics;
+using Unity.Transforms;
+using Unity.VisualScripting;
 
 [BurstCompile]
 public partial struct BoardFillSystem : ISystem
 {
-    EntityQuery EmptyTileTagQuery;
+    EntityQuery m_EmptyTileTagQuery;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        EmptyTileTagQuery = state.GetEntityQuery(ComponentType.ReadWrite<EmptyTileTag>());
+        m_EmptyTileTagQuery = state.GetEntityQuery(ComponentType.ReadWrite<EmptyTileTag>());
 
         state.RequireForUpdate<BoardFillStateTag>();
-        state.RequireForUpdate(EmptyTileTagQuery);
+        state.RequireForUpdate(m_EmptyTileTagQuery);
     }
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
@@ -31,20 +34,20 @@ public partial struct BoardFillSystem : ISystem
         var boardEntity = SystemAPI.GetSingletonEntity<BoardData>();
         var getPieceAspect = SystemAPI.GetAspectRO<BoardGetRandomGamePieceAspect>(boardEntity);
 
-        var spawnJobHandle = new GamePieceSpawnJob
+        state.Dependency = new GamePieceSpawnJob
         {
             ECB = ecbAsParallelWriter,
-            GetPieceAspect = getPieceAspect
-        }.ScheduleParallel(EmptyTileTagQuery, state.Dependency);
-        spawnJobHandle.Complete();
+            GetPieceAspect = getPieceAspect,
+        }.ScheduleParallel(m_EmptyTileTagQuery, state.Dependency);
 
-        state.Dependency = spawnJobHandle;
 
         ecb.RemoveComponent<BoardFillStateTag>(boardEntity);
+        ecb.AddComponent<BoardMoveStateTag>(boardEntity);
+
     }
 }
 
-[BurstCompile]
+//[BurstCompile]
 partial struct GamePieceSpawnJob : IJobEntity
 {
     public EntityCommandBuffer.ParallelWriter ECB;
@@ -54,12 +57,21 @@ partial struct GamePieceSpawnJob : IJobEntity
 
     void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity, in TileAspect tileAspect)
     {
+
         var randomGamePieceBuffer = GetPieceAspect.GetRandomGamePiece(chunkIndex, tileAspect.Seed);
         var gamePieceEntity = ECB.Instantiate(chunkIndex, randomGamePieceBuffer.Prefab);
         var gamePieceData = tileAspect.GetGamePieceData(randomGamePieceBuffer);
 
+        var spawnTransform = UniformScaleTransform.FromPosition(tileAspect.Coord.x, tileAspect.Coord.y + 10f, 0);
+
+        ECB.SetComponent(chunkIndex, gamePieceEntity, new LocalToWorldTransform
+        {
+            Value = spawnTransform
+        });
+
 
         ECB.AddComponent(chunkIndex, gamePieceEntity, gamePieceData);
+        ECB.AddComponent<GamePieceMoveTag>(chunkIndex, gamePieceEntity);
         ECB.RemoveComponent<EmptyTileTag>(chunkIndex, entity);
     }
 }

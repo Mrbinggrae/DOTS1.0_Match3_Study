@@ -12,7 +12,7 @@ public readonly partial struct TileAspect : IAspect
         get => Tile.ValueRO.Seed;
     }
 
-    int2 Coord
+    public int2 Coord
     {
         get => Tile.ValueRO.Coord;
     }
@@ -24,6 +24,5 @@ public readonly partial struct TileAspect : IAspect
         gamePieceData.Coord = Coord;
 
         return gamePieceData;
-
     }
 }
