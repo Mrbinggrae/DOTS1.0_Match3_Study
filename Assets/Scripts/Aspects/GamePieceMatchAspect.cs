@@ -6,7 +6,6 @@ using Unity.VisualScripting;
 
 public readonly partial struct GamePieceMatchAspect : IAspect
 {
-    readonly Entity entity;
     readonly RefRO<GamePieceData> pieceData;
 
     int2 Coord
@@ -27,7 +26,6 @@ public readonly partial struct GamePieceMatchAspect : IAspect
         {
             int nextX = Coord.x + (int)math.clamp(matchDirection.x, -1, 1) * i;
             int nextY = Coord.y + (int)math.clamp(matchDirection.y, -1, 1) * i;
-            ECB.AddComponent(chunkIndex, allEntity[new(nextX, nextY)], new DelayTimerData { Value = BoardConfig.GAME_DELAY_TIME });
             ECB.DestroyEntity(chunkIndex, allEntity[new(nextX, nextY)]);
         }
     }

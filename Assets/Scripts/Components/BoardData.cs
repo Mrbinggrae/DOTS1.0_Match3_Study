@@ -29,5 +29,4 @@ public struct BoardQeury
     {
         return (coord.x >= 0 && coord.x < boardSize.x && coord.y >= 0 && coord.y < boardSize.y);
     }
-
 }

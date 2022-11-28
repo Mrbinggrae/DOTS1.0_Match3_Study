@@ -21,6 +21,7 @@ public partial struct GamePieceMoveSystem : ISystem
     public void OnDestroy(ref SystemState state)
     {
     }
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -50,6 +51,7 @@ public partial struct GamePieceMoveSystem : ISystem
     }
 }
 
+[BurstCompile]
 partial struct GamePieceMoveJob : IJobEntity
 {
     public EntityCommandBuffer.ParallelWriter ECB;

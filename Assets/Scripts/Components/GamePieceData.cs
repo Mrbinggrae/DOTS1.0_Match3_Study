@@ -13,7 +13,7 @@ public enum MatchValue
     Purple,
 }
 
-public struct GamePieceData : IComponentData
+public struct GamePieceData : IComponentData, ICleanupComponentData
 {
     public MatchValue MatchValue;
     public int2 Coord;
