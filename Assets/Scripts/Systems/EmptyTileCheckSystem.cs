@@ -37,12 +37,12 @@ public partial struct EmptyTileCheckSystem : ISystem
         var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
         var ecbAsParallelWriter = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
-        NativeHashMap<int2, GamePieceData> gamePieceHashMap
+        NativeParallelHashMap<int2, GamePieceData> gamePieceHashMap
             = new(m_GamePieceQuery.CalculateEntityCount(), Allocator.TempJob);
 
-        new GenerateGamePieceDataHashMapJob
+        var generateDataMapJob =  new GenerateGamePieceDataHashMapJob
         {
-            GamePieceDataMap = gamePieceHashMap,
+            GamePieceDataMap = gamePieceHashMap.AsParallelWriter(),
         }.ScheduleParallel(m_GamePieceQuery, state.Dependency);
 
 
@@ -50,7 +50,7 @@ public partial struct EmptyTileCheckSystem : ISystem
         {
             ECB = ecbAsParallelWriter,
             GamePieceHashMap = gamePieceHashMap,
-        }.ScheduleParallel(m_TileQuery, state.Dependency).Complete();
+        }.ScheduleParallel(m_TileQuery, generateDataMapJob).Complete();
 
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
@@ -69,7 +69,7 @@ partial struct AddEmptyTileJob : IJobEntity
     public EntityCommandBuffer.ParallelWriter ECB;
 
     [ReadOnly]
-    public NativeHashMap<int2, GamePieceData> GamePieceHashMap;
+    public NativeParallelHashMap<int2, GamePieceData> GamePieceHashMap;
 
     void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity, ref TileData tileData)
     {

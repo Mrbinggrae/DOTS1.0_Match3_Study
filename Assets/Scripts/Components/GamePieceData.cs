@@ -1,5 +1,7 @@
+using System;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 
 public enum MatchValue
 {
@@ -13,18 +15,15 @@ public enum MatchValue
     Purple,
 }
 
+[Serializable]
 public struct GamePieceData : IComponentData, ICleanupComponentData
 {
     public MatchValue MatchValue;
     public int2 Coord;
 }
-
-public struct HorizontalMatchedBuffer : IBufferElementData
+[Serializable]
+public struct GamePieceEntity
 {
-    public Entity MatchedGamePiece;
-}
-
-public struct VerticalMatchedBuffer : IBufferElementData
-{
-    public Entity MatchedGamePiece;
+    public Entity Entity;
+    public GamePieceData Data;
 }

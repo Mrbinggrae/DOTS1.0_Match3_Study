@@ -5,11 +5,12 @@ using Random = Unity.Mathematics.Random;
 
 public readonly partial struct TileAspect : IAspect
 {
-    readonly RefRO<TileData> Tile;
+    readonly RefRW<TileData> Tile;
 
     public int Seed
     {
         get => Tile.ValueRO.Seed;
+        set => Tile.ValueRW.Seed = value;
     }
 
     public int2 Coord

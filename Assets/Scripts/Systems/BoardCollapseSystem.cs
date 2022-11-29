@@ -12,7 +12,6 @@ public partial struct BoardCollapseSystem : ISystem
     EntityQuery m_DestroyGamePieceQuery;
     EntityQuery m_GamePieceQuery;
     EntityQuery m_CollapseStateTagQuery;
-    EntityQuery m_TileQuery;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -32,15 +31,12 @@ public partial struct BoardCollapseSystem : ISystem
             .WithNone<DelayTimerData>()
             .Build(state.EntityManager);
 
-
-        m_TileQuery = state.GetEntityQuery(ComponentType.ReadWrite<TileData>());
         state.RequireForUpdate(m_CollapseStateTagQuery);
     }
 
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
-
     }
 
     [BurstCompile]
@@ -57,21 +53,24 @@ public partial struct BoardCollapseSystem : ISystem
         var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
         var ecbParallelWriter = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
-        NativeHashMap<int2, GamePieceData> destroyGamePieceMap
+        NativeParallelHashMap<int2, GamePieceData> destroyGamePieceMap
            = new(m_DestroyGamePieceQuery.CalculateEntityCount(), Allocator.TempJob);
 
-
-        new GenerateGamePieceDataHashMapJob
+        
+        var GenerateMapJobHandle = new GenerateGamePieceDataHashMapJob
         {
-            GamePieceDataMap = destroyGamePieceMap,
+            GamePieceDataMap = destroyGamePieceMap.AsParallelWriter(),
         }.ScheduleParallel(m_DestroyGamePieceQuery, state.Dependency);
 
-        new CollapseGamePieceJob
+        state.Dependency = new CollapseGamePieceJob
         {
             ECB = ecbParallelWriter,
             DestroyGamePieceDataMap = destroyGamePieceMap,
 
-        }.ScheduleParallel(m_GamePieceQuery, state.Dependency).Complete();
+        }.ScheduleParallel(m_GamePieceQuery, GenerateMapJobHandle);
+
+        state.Dependency.Complete();
+
 
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
         ecb.RemoveComponentForEntityQuery<GamePieceData>(m_DestroyGamePieceQuery);
@@ -88,9 +87,7 @@ public partial struct BoardCollapseSystem : ISystem
         public EntityCommandBuffer.ParallelWriter ECB;
 
         [ReadOnly]
-        public NativeHashMap<int2, GamePieceData> DestroyGamePieceDataMap;
-
-
+        public NativeParallelHashMap<int2, GamePieceData> DestroyGamePieceDataMap;
 
         void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity, ref GamePieceData gamePieceData)
         {
@@ -106,9 +103,7 @@ public partial struct BoardCollapseSystem : ISystem
                 FallCount++;
             }
 
-
             gamePieceData.Coord.y -= FallCount;
-
 
             if (FallCount > 0) ECB.AddComponent<GamePieceMoveTag>(chunkIndex, entity);
         }

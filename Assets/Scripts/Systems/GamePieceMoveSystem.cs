@@ -27,7 +27,8 @@ public partial struct GamePieceMoveSystem : ISystem
     {
         var boardEntity = SystemAPI.GetSingletonEntity<BoardData>();
 
-        var beginSimECBSystem = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+
+       var beginSimECBSystem = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
         var beginECB = beginSimECBSystem.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
         var deltaTime = SystemAPI.Time.DeltaTime;

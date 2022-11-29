@@ -35,34 +35,25 @@ public partial struct BoardMatchSystem : ISystem
         state.RequireForUpdate(m_BoardMatchStateTagQuery);
 
     }
+
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
     }
 
-    //[BurstCompile]
+    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var boardEntity = SystemAPI.GetSingletonEntity<BoardData>();
         var boardData = SystemAPI.GetSingleton<BoardData>();
 
-
-        NativeHashMap<int2, GamePieceData> allGamePieceDataMap
+        NativeParallelHashMap<int2, GamePieceEntity> allGamePieceEntityMap
             = new(m_AllGamePieceQeury.CalculateEntityCount(), Allocator.TempJob);
-
-        NativeHashMap<int2, Entity> allGamePieceEntityMap
-            = new(m_AllGamePieceQeury.CalculateEntityCount(), Allocator.TempJob);
-
-        new GenerateGamePieceDataHashMapJob
-        {
-            GamePieceDataMap = allGamePieceDataMap
-        }.ScheduleParallel(m_AllGamePieceQeury, state.Dependency);
 
         var entityHashMapJob = new GenerateGamePieceEntityHashMapJob
         {
-            GamePieceEntityMap = allGamePieceEntityMap
+            GamePieceEntityMap = allGamePieceEntityMap.AsParallelWriter()
         }.ScheduleParallel(m_AllGamePieceQeury, state.Dependency);
-        entityHashMapJob.Complete();
 
         var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
         var ecbParallel = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
@@ -70,11 +61,10 @@ public partial struct BoardMatchSystem : ISystem
         new GamePieceMatchJob
         {
             ECB = ecbParallel,
-            AllGamePieceDataMap = allGamePieceDataMap,
             BoardSize = boardData.BoardSize,
             AllGamePieceEntityMap = allGamePieceEntityMap,
 
-        }.ScheduleParallel(m_MatchCheckGamePieceQuery, state.Dependency).Complete();
+        }.ScheduleParallel(m_MatchCheckGamePieceQuery, entityHashMapJob).Complete();
 
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
@@ -83,7 +73,6 @@ public partial struct BoardMatchSystem : ISystem
         ecb.RemoveComponent<BoardMatchStateTag>(boardEntity);
 
         allGamePieceEntityMap.Dispose();
-        allGamePieceDataMap.Dispose();
     }
 
     [BurstCompile]
@@ -93,15 +82,12 @@ public partial struct BoardMatchSystem : ISystem
         public int2 BoardSize;
         public Entity boardData;
 
-        [ReadOnly]
-        public NativeHashMap<int2, GamePieceData> AllGamePieceDataMap;
-
         [NativeDisableParallelForRestriction]
-        public NativeHashMap<int2, Entity> AllGamePieceEntityMap;
+        public NativeParallelHashMap<int2, GamePieceEntity> AllGamePieceEntityMap;
 
         void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity, ref GamePieceMatchAspect matchAspect)
         {
-            matchAspect.FindMatches(ECB, chunkIndex, AllGamePieceDataMap, AllGamePieceEntityMap, BoardSize);
+            matchAspect.FindMatches(ECB, chunkIndex, AllGamePieceEntityMap, BoardSize);
             ECB.RemoveComponent<GamePieceMatchCheckTag>(chunkIndex, entity);
         }
     }

@@ -7,33 +7,30 @@ using Unity.Mathematics;
 [BurstCompile]
 partial struct GenerateGamePieceEntityHashMapJob : IJobEntity
 {
-    [NativeDisableParallelForRestriction]
-    public NativeHashMap<int2, Entity> GamePieceEntityMap;
+    public NativeParallelHashMap<int2, GamePieceEntity>.ParallelWriter GamePieceEntityMap;
 
     void Execute(Entity entity, in GamePieceData gamePieceData)
     {
-        GamePieceEntityMap[gamePieceData.Coord]=  entity;
+        GamePieceEntityMap.TryAdd(gamePieceData.Coord, new GamePieceEntity() { Entity = entity, Data = gamePieceData });
     }
 }
 [BurstCompile]
 partial struct GenerateGamePieceDataHashMapJob : IJobEntity
 {
-    [NativeDisableParallelForRestriction]
-    public NativeHashMap<int2, GamePieceData> GamePieceDataMap;
+    public NativeParallelHashMap<int2, GamePieceData>.ParallelWriter GamePieceDataMap;
 
     void Execute(in GamePieceData gamePieceData)
     {
-        GamePieceDataMap[gamePieceData.Coord] = gamePieceData;
+        GamePieceDataMap.TryAdd(gamePieceData.Coord, gamePieceData);
     }
 }
 [BurstCompile]
 partial struct GenerateTileEntityHashMapJob : IJobEntity
 {
-    [NativeDisableParallelForRestriction]
-    public NativeHashMap<int2, Entity> TileHashMap;
+    public NativeParallelHashMap<int2, Entity>.ParallelWriter TileHashMap;
 
     void Execute(Entity entity, in TileData tileData)
     {
-        TileHashMap[tileData.Coord] = entity;
+        TileHashMap.TryAdd(tileData.Coord, entity);
     }
 }

@@ -4,6 +4,7 @@ using Unity.Entities;
 
 
 [BurstCompile]
+[UpdateAfter(typeof(BoardCollapseSystem))]
 public partial struct TileGenerateSystem : ISystem
 {
     [BurstCompile]

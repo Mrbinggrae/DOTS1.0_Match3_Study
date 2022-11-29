@@ -2,9 +2,9 @@ using UnityEngine;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Burst.Intrinsics;
 using Unity.Transforms;
-using Unity.VisualScripting;
+using Unity.Mathematics;
+using Random = Unity.Mathematics.Random;
 
 [BurstCompile]
 public partial struct BoardFillSystem : ISystem
@@ -58,20 +58,22 @@ public partial struct BoardFillSystem : ISystem
         [ReadOnly]
         public BoardGetRandomGamePieceAspect GetPieceAspect;
 
-        void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity, in TileAspect tileAspect)
+        void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity, ref TileAspect tileAspect)
         {
-
             var randomGamePieceBuffer = GetPieceAspect.GetRandomGamePiece(chunkIndex, tileAspect.Seed);
+
+            var random = Random.CreateFromIndex((uint)(tileAspect.Seed +chunkIndex));
+            tileAspect.Seed = random.NextInt(0, int.MaxValue);
+
             var gamePieceEntity = ECB.Instantiate(chunkIndex, randomGamePieceBuffer.Prefab);
             var gamePieceData = tileAspect.GetGamePieceData(randomGamePieceBuffer);
 
-            var spawnTransform = UniformScaleTransform.FromPosition(tileAspect.Coord.x, tileAspect.Coord.y + 10f, 0);
+            var spawnTransform = UniformScaleTransform.FromPosition(tileAspect.Coord.x, tileAspect.Coord.y + 7f, 0);
 
             ECB.SetComponent(chunkIndex, gamePieceEntity, new LocalToWorldTransform
             {
                 Value = spawnTransform
             });
-
 
             ECB.AddComponent(chunkIndex, gamePieceEntity, gamePieceData);
             ECB.AddComponent<GamePieceMoveTag>(chunkIndex, gamePieceEntity);

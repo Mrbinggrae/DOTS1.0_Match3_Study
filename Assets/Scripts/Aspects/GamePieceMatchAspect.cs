@@ -16,7 +16,7 @@ public readonly partial struct GamePieceMatchAspect : IAspect
     private void DestroyMatchedGamePiece
         (EntityCommandBuffer.ParallelWriter ECB,
         int chunkIndex,
-        NativeHashMap<int2, Entity> allEntity,
+        NativeParallelHashMap<int2, GamePieceEntity> allEntity,
         int matchCount,
         int2 matchDirection
         )
@@ -26,59 +26,62 @@ public readonly partial struct GamePieceMatchAspect : IAspect
         {
             int nextX = Coord.x + (int)math.clamp(matchDirection.x, -1, 1) * i;
             int nextY = Coord.y + (int)math.clamp(matchDirection.y, -1, 1) * i;
-            ECB.DestroyEntity(chunkIndex, allEntity[new(nextX, nextY)]);
+            ECB.DestroyEntity(chunkIndex, allEntity[new(nextX, nextY)].Entity);
         }
     }
 
-    public void FindMatches(EntityCommandBuffer.ParallelWriter ECB, int chunkIndex, NativeHashMap<int2, GamePieceData> allGamePiece, NativeHashMap<int2, Entity> allEntity, int2 boardSize, int minLength = 3)
+    public void FindMatches(
+        EntityCommandBuffer.ParallelWriter ECB, 
+        int chunkIndex, 
+        NativeParallelHashMap<int2, GamePieceEntity> allEntity,
+        int2 boardSize, int minLength = 3)
     {
-        int verMatchCount = FindMatchVertical(ECB, chunkIndex, allGamePiece, allEntity, boardSize, 3);
-        int horMatchCount = FindMatchHorizontal(ECB, chunkIndex, allGamePiece, allEntity, boardSize, 3);
+        int verMatchCount = FindMatchVertical(ECB, chunkIndex, allEntity, boardSize, 3);
+        int horMatchCount = FindMatchHorizontal(ECB, chunkIndex, allEntity, boardSize, 3);
     }
 
     public int FindMatchVertical(EntityCommandBuffer.ParallelWriter ECB,
         int chunkIndex,
-        NativeHashMap<int2, GamePieceData> allGamePiece,
-        NativeHashMap<int2, Entity> allEntity,
+        NativeParallelHashMap<int2, GamePieceEntity> allGamePieceEntity,
         int2 boardSize,
         int minLength = 3)
     {
 
-        int downwardMatchCount = FindMatcheCount(allGamePiece, new int2(0, -1), boardSize, 2);
-        int upwardMatchCount = FindMatcheCount(allGamePiece, new int2(0, 1), boardSize, 2);
+        int downwardMatchCount = FindMatcheCount(allGamePieceEntity, new int2(0, -1), boardSize, 2);
+        int upwardMatchCount = FindMatcheCount(allGamePieceEntity, new int2(0, 1), boardSize, 2);
 
         int matchCount = downwardMatchCount + upwardMatchCount;
 
         if (downwardMatchCount + upwardMatchCount >= minLength)
         {
-            DestroyMatchedGamePiece(ECB, chunkIndex, allEntity, downwardMatchCount, new int2(0, -1));
-            DestroyMatchedGamePiece(ECB, chunkIndex, allEntity, upwardMatchCount, new int2(0, 1));
+            DestroyMatchedGamePiece(ECB, chunkIndex, allGamePieceEntity, downwardMatchCount, new int2(0, -1));
+            DestroyMatchedGamePiece(ECB, chunkIndex, allGamePieceEntity, upwardMatchCount, new int2(0, 1));
         }
 
         return matchCount;
     }
 
     public int FindMatchHorizontal(EntityCommandBuffer.ParallelWriter ECB,
-        int chunkIndex, NativeHashMap<int2, GamePieceData> allGamePiece,
-        NativeHashMap<int2, Entity> allEntity,
+        int chunkIndex,
+        NativeParallelHashMap<int2, GamePieceEntity> allGamePieceEntity,
         int2 boardSize,
         int minLength = 3)
     {
-        int leftMatchCount = FindMatcheCount(allGamePiece, new int2(-1, 0), boardSize);
-        int rightMatchCount = FindMatcheCount(allGamePiece, new int2(1, 0), boardSize);
+        int leftMatchCount = FindMatcheCount(allGamePieceEntity, new int2(-1, 0), boardSize);
+        int rightMatchCount = FindMatcheCount(allGamePieceEntity, new int2(1, 0), boardSize);
 
         int matchCount = leftMatchCount + rightMatchCount;
 
         if (leftMatchCount + rightMatchCount >= minLength)
         {
-            DestroyMatchedGamePiece(ECB, chunkIndex, allEntity, leftMatchCount, new int2(-1, 0));
-            DestroyMatchedGamePiece(ECB, chunkIndex, allEntity, rightMatchCount, new int2(1, 0));
+            DestroyMatchedGamePiece(ECB, chunkIndex, allGamePieceEntity, leftMatchCount, new int2(-1, 0));
+            DestroyMatchedGamePiece(ECB, chunkIndex, allGamePieceEntity, rightMatchCount, new int2(1, 0));
         }
 
         return matchCount;
     }
 
-    public int FindMatcheCount(NativeHashMap<int2, GamePieceData> allGamePiece, int2 searchDirection, int2 boardSize, int minLength = 2)
+    public int FindMatcheCount(NativeParallelHashMap<int2, GamePieceEntity> allGamePieceEntity, int2 searchDirection, int2 boardSize, int minLength = 2)
     {
         int MatchCount = 1;
 
@@ -94,9 +97,9 @@ public readonly partial struct GamePieceMatchAspect : IAspect
             int nextY = Coord.y + (int)math.clamp(searchDirection.y, -1, 1) * i;
 
             if (!BoardQeury.IsWithinBounds(boardSize, nextX, nextY)) break;
-            if (!allGamePiece.ContainsKey(new(nextX, nextY))) break;
+            if (!allGamePieceEntity.ContainsKey(new(nextX, nextY))) break;
 
-            GamePieceData nextPiece = allGamePiece[new int2(nextX, nextY)];
+            GamePieceData nextPiece = allGamePieceEntity[new int2(nextX, nextY)].Data;
 
 
             // 매칭 여부 확인
