@@ -63,8 +63,9 @@ public partial struct BoardMatchSystem : ISystem
             ECB = ecbParallel,
             BoardSize = boardData.BoardSize,
             AllGamePieceEntityMap = allGamePieceEntityMap,
+        }.Schedule(m_MatchCheckGamePieceQuery, entityHashMapJob).Complete();
 
-        }.ScheduleParallel(m_MatchCheckGamePieceQuery, entityHashMapJob).Complete();
+
 
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 

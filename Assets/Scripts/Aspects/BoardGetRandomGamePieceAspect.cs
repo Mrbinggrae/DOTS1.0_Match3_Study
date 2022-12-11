@@ -8,11 +8,9 @@ public readonly partial struct BoardGetRandomGamePieceAspect : IAspect
 {
     readonly DynamicBuffer<GamePiecePrefabBuffer> PiecePrefabBuffers;
 
-    public GamePiecePrefabBuffer GetRandomGamePiece(int chunkIndex, int Seed)
+    public GamePiecePrefabBuffer GetRandomGamePiece(int chunkIndex, Random random)
     {
-        var random = Random.CreateFromIndex((uint)Seed + (uint)chunkIndex);
         var PieceBuffer = PiecePrefabBuffers[random.NextInt(0, PiecePrefabBuffers.Length)];
-        
         return PieceBuffer;
     }
 }

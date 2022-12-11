@@ -73,7 +73,10 @@ public partial struct BoardCollapseSystem : ISystem
 
 
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-        ecb.RemoveComponentForEntityQuery<GamePieceData>(m_DestroyGamePieceQuery);
+        ecb.RemoveComponent<GamePieceData>(m_DestroyGamePieceQuery.ToEntityArray(Allocator.Temp));
+
+
+
         ecb.RemoveComponent<BoardCollapseStateTag>(boardEntity);
         ecb.AddComponent<BoardSearchEmptyTileStateTag>(boardEntity);
 

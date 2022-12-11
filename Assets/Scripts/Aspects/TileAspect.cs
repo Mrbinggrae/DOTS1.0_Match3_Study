@@ -7,10 +7,10 @@ public readonly partial struct TileAspect : IAspect
 {
     readonly RefRW<TileData> Tile;
 
-    public int Seed
+    public Random Seed
     {
-        get => Tile.ValueRO.Seed;
-        set => Tile.ValueRW.Seed = value;
+        get => Tile.ValueRO.Randomizer;
+        set => Tile.ValueRW.Randomizer = value;
     }
 
     public int2 Coord
@@ -24,6 +24,8 @@ public readonly partial struct TileAspect : IAspect
         gamePieceData.MatchValue = buffer.MatchValue;
         gamePieceData.Coord = Coord;
 
+        Seed = new Random((uint)Seed.NextInt(0, int.MaxValue));
         return gamePieceData;
     }
+
 }

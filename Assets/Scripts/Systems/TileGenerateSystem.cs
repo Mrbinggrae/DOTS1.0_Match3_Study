@@ -34,7 +34,7 @@ public partial struct TileGenerateSystem : ISystem
 
                 ecb.AddComponent(TileEntity, new TileData
                 {
-                    Seed = UnityEngine.Random.Range(0, int.MaxValue),
+                    Randomizer = new Unity.Mathematics.Random((uint)UnityEngine.Random.Range(0, int.MaxValue)),
                     Coord =  new(x, y)
                 });
 

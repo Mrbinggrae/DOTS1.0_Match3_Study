@@ -61,10 +61,6 @@ public partial struct BoardFillSystem : ISystem
         void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity, ref TileAspect tileAspect)
         {
             var randomGamePieceBuffer = GetPieceAspect.GetRandomGamePiece(chunkIndex, tileAspect.Seed);
-
-            var random = Random.CreateFromIndex((uint)(tileAspect.Seed +chunkIndex));
-            tileAspect.Seed = random.NextInt(0, int.MaxValue);
-
             var gamePieceEntity = ECB.Instantiate(chunkIndex, randomGamePieceBuffer.Prefab);
             var gamePieceData = tileAspect.GetGamePieceData(randomGamePieceBuffer);
 
